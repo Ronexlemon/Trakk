@@ -45,7 +45,7 @@ func (u *UserRoutes) Login( w http.ResponseWriter, r *http.Request){
 		return}
 		ctx,cancel := context.WithTimeout(context.Background(),5 *time.Second)
 		defer cancel()
-	userr,err:=u.userRepo.checkUser(user.Email,user.Password,ctx)
+	userr,err:=u.userRepo.login(user.Email,user.Password,ctx)
 	fmt.Println("User two details",userr)
 	if err !=nil{
 		http.Error(w,err.Error(),http.StatusUnauthorized)
