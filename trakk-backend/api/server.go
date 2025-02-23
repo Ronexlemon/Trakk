@@ -14,7 +14,8 @@ func Server() {
 	router := mux.NewRouter()
 
 	
-	db.CreateClient()
+	//db.CreateClient()
+	db.CreateMongoClient()
 
 	
 	InitializeRoutes(router)

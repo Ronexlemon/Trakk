@@ -1,15 +1,37 @@
 package db
 
 import (
+	
 	"log"
 	"os"
 
 	"github.com/joho/godotenv"
 	supa "github.com/nedpals/supabase-go"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
+	//"go.mongodb.org/mongo-driver/v2/mongo/readpref"
 )
 
 var Supabase *supa.Client
+var MongoClient   *mongo.Client
 
+
+func CreateMongoClient() error{
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+		return err
+		}
+		uri := os.Getenv("MONGO_KEY")
+		serverAPI := options.ServerAPI(options.ServerAPIVersion1)
+	opts := options.Client().ApplyURI(uri).SetServerAPIOptions(serverAPI)
+		MongoClient, err = mongo.Connect(opts)
+		if err != nil {
+			log.Fatal(err)
+			return err
+		}
+		return nil
+}
 func CreateClient() error {
 	// Load environment variables from .env file
 	err := godotenv.Load(".env")
@@ -28,6 +50,7 @@ func CreateClient() error {
 
 	// Create Supabase client
 	Supabase = supa.CreateClient(url, key)
+	
 	log.Println("Supabase client created successfully")
 	return nil
 }
