@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+	"trakk/pkg/auth"
 )
 
 type UserRoutes struct{
@@ -51,6 +52,15 @@ func (u *UserRoutes) Login( w http.ResponseWriter, r *http.Request){
 		http.Error(w,err.Error(),http.StatusUnauthorized)
 		return
 	}
-	json.NewEncoder(w).Encode(userr)
+	//jwt create token
+	token,err := auth.CreateToken(userr.Username,user.Email,userr.Phone)
+	if err!=nil{
+		http.Error(w,err.Error(),http.StatusInternalServerError)
+		return
+		}
+		json.NewEncoder(w).Encode(token)
+		
+
+	
 
 }

@@ -25,7 +25,7 @@ func CreateToken(username string,email string , phone string)(string,error){
 		log.Fatal(err)
 		return "",err
 		}
-		tokenString, err := token.SignedString(secret)
+		tokenString, err := token.SignedString([]byte(secret))
 		if err != nil {
 			return "",err
 			}
