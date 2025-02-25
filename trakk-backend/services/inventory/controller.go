@@ -17,12 +17,14 @@ type  InventoryRoutes struct{
 	repository *Repository
 }
 
+var userContext  =middleware.UserContextKey
+
 func CreateRoutes(repo *Repository)*InventoryRoutes{
 	return &InventoryRoutes{repository: repo}
 }
 
 func (i *InventoryRoutes) CreateInventory(w http.ResponseWriter, r *http.Request){
-	userContext :=middleware.UserContextKey
+	
 	
 	claims, ok := r.Context().Value(userContext).(jwt.MapClaims)
 	
@@ -51,7 +53,7 @@ func (i *InventoryRoutes) CreateInventory(w http.ResponseWriter, r *http.Request
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 		}
-	//TODO  pass the data to the db
+	
 	result,err := i.repository.Create(&inventory,ctx)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -59,4 +61,24 @@ func (i *InventoryRoutes) CreateInventory(w http.ResponseWriter, r *http.Request
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(map[string]string{"Created":result.Name})
 
+}
+
+
+func (i *InventoryRoutes) UserInventories(w http.ResponseWriter , r *http.Request){
+	claims,ok := r.Context().Value(userContext).(jwt.MapClaims)
+	if !ok {
+		http.Error(w, "Failed to retrieve user info from context", http.StatusUnauthorized)
+		return
+		}
+		id := claims["id"].(string)
+		
+		ctx,cancel := context.WithTimeout(context.Background(),time.Second*10)
+		defer cancel()
+		inventories,err:=i.repository.GetAll(id,ctx)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+			}
+			json.NewEncoder(w).Encode(map[string][]Inventory{"Inventories":inventories})
+	
 }

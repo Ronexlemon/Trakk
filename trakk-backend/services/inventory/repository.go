@@ -6,6 +6,7 @@ import (
 
 	//supa "github.com/nedpals/supabase-go"
 	//"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
@@ -40,7 +41,15 @@ func (r *Repository) Update(inventory_id string)(string, error){
 	return "inventory updated",nil
 }
 
-func (r *Repository) GetAll(user_id string)(*Inventory,error){
-	//logic to get all inventory
-	return &Inventory{},nil
+func (r *Repository) GetAll(user_id string,ctx context.Context)([]Inventory,error){
+	cursor,err := r.dbClient.Database("Trakk").Collection("inventories").Find(ctx,bson.M{"user_id":user_id})
+	if err != nil{
+		return nil,err
+		}
+		var inventories []Inventory
+		if err = cursor.All(ctx,&inventories);err != nil{
+			return nil,err
+			}
+			return inventories,nil
+	
 }
