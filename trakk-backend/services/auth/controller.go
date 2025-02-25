@@ -49,11 +49,14 @@ func (u *UserRoutes) Login( w http.ResponseWriter, r *http.Request){
 	userr,err:=u.userRepo.login(user.Email,user.Password,ctx)
 	fmt.Println("User two details",userr)
 	if err !=nil{
+		fmt.Println("her error",err.Error())
 		http.Error(w,err.Error(),http.StatusUnauthorized)
+		
 		return
 	}
+	fmt.Println("USER",userr)
 	//jwt create token
-	token,err := auth.CreateToken(userr.Username,user.Email,userr.Phone)
+	token,err := auth.CreateToken(userr.Username,user.Email,userr.Phone,userr.ID)
 	if err!=nil{
 		http.Error(w,err.Error(),http.StatusInternalServerError)
 		return

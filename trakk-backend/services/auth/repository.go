@@ -8,6 +8,7 @@ import (
 	"trakk/pkg/encrption"
 
 	//supa "github.com/nedpals/supabase-go"
+	
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
@@ -19,6 +20,7 @@ type UserRepository struct {
 }
 
 func NewUserRepository() *UserRepository {
+	db.CreateUserIndex(db.MongoClient) //create unique fields
 	return &UserRepository{mongoclient: db.MongoClient}
 }
 
@@ -113,6 +115,7 @@ func (u *UserRepository) login(email string, password string,ctx context.Context
 		return User{}, fmt.Errorf("invalid password")
 	}
 	user.Password =""
+	
 
 	// Return the user details
 	return user, nil

@@ -7,15 +7,18 @@ import (
 	"trakk/config"
 
 	"github.com/golang-jwt/jwt/v5"
+	//"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 
 
-func CreateToken(username string,email string , phone string)(string,error){
+func CreateToken(username string,email string , phone string, Id bson.ObjectID)(string,error){
 	token:= jwt.NewWithClaims(jwt.SigningMethodHS256,jwt.MapClaims{
 		"username":username,
 		"email":email,
 		"phone":phone,
+		"id":Id,
 		"exp":jwt.NewNumericDate(time.Now().Add(time.Hour*72)).Unix(),
 		"iat": time.Now().Unix(),
 

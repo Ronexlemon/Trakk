@@ -1,6 +1,8 @@
 package api
 
 import (
+	"net/http"
+	"trakk/middleware"
 	"trakk/services/auth"
 	"trakk/services/inventory"
 
@@ -14,7 +16,7 @@ func InitializeRoutes(r *mux.Router){
   authRoutes := auth.InitializeUserRoutes(u)
   r.HandleFunc("/api/user/create",authRoutes.CreateUser).Methods("POST")
   r.HandleFunc("/api/user/login",authRoutes.Login).Methods("POST")
-  r.HandleFunc("/api/inventory,create",inventoryRoutes.CreateInventory).Methods("POST")
+  r.Handle("/api/inventory/create",middleware.JwtAuthMiddleware(http.HandlerFunc(inventoryRoutes.CreateInventory))).Methods("POST")
   //r.HandleFunc("/api/user/login",authRoutes.LoginUser).Methods("POST")
 
 

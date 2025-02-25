@@ -13,7 +13,7 @@ import (
 
 type contextKey string
 
-const userContextKey contextKey = "userClaims"
+const UserContextKey contextKey = "userClaims"
 
 func JwtAuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -48,7 +48,7 @@ func JwtAuthMiddleware(next http.Handler) http.Handler {
 		}
 
 		
-		ctx := context.WithValue(r.Context(), userContextKey, claims)
+		ctx := context.WithValue(r.Context(), UserContextKey, claims)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
