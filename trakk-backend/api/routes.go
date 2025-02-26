@@ -18,6 +18,8 @@ func InitializeRoutes(r *mux.Router){
   r.HandleFunc("/api/user/login",authRoutes.Login).Methods("POST")
   r.Handle("/api/inventory/create",middleware.JwtAuthMiddleware(http.HandlerFunc(inventoryRoutes.CreateInventory))).Methods("POST")
   r.Handle("/api/inventory/user/inventories",middleware.JwtAuthMiddleware(http.HandlerFunc(inventoryRoutes.UserInventories))).Methods("GET")
+  r.Handle("/api/inventory/{id}",middleware.JwtAuthMiddleware(http.HandlerFunc(inventoryRoutes.UpdateInventory))).Methods("PUT")
+  r.Handle("/api/inventory/{id}",middleware.JwtAuthMiddleware(http.HandlerFunc(inventoryRoutes.Deletenventory))).Methods("DELETE")
 
   //r.HandleFunc("/api/user/login",authRoutes.LoginUser).Methods("POST")
 
