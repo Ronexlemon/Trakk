@@ -2,6 +2,7 @@ package inventory
 
 import (
 	"context"
+	"fmt"
 	"trakk/db"
 
 	//supa "github.com/nedpals/supabase-go"
@@ -42,7 +43,13 @@ func (r *Repository) Update(inventory_id string)(string, error){
 }
 
 func (r *Repository) GetAll(user_id string,ctx context.Context)([]Inventory,error){
-	cursor,err := r.dbClient.Database("Trakk").Collection("inventories").Find(ctx,bson.M{"user_id":user_id})
+	fmt.Println("user_id",user_id)
+	id,err :=bson.ObjectIDFromHex(user_id)
+	if err != nil {
+		return nil, err
+		}
+	cursor,err := r.dbClient.Database("Trakk").Collection("inventories").Find(ctx,bson.M{"user_id":id})
+	fmt.Println("cursor",cursor)
 	if err != nil{
 		return nil,err
 		}
