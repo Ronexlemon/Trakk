@@ -171,3 +171,26 @@ inventory_Id := vars["id"]
 		}
 		json.NewEncoder(w).Encode(map[string]string{"message":message})
 }
+
+
+func (i *InventoryRoutes) InventoriesPerPeriod(w http.ResponseWriter, r *http.Request){
+	claims,ok := r.Context().Value(userContext).(jwt.MapClaims)
+	if !ok {
+		http.Error(w, "Failed to retrieve user info from context", http.StatusUnauthorized)
+		return
+		}
+	ctx, cancel:= context.WithTimeout(context.Background(),5 *time.Second)
+	defer cancel()
+	id,err :=  bson.ObjectIDFromHex(claims["id"].(string))
+		if err != nil {
+			http.Error(w,"Invalid user ID Format", http.StatusBadRequest)
+			return
+		}
+
+	inventories,err:=i.repository.InventoryPerPeriod(id,"monthly",ctx)
+	if err !=nil{
+		http.Error(w,"Unable to fetch inventorires",http.StatusInternalServerError)
+		return
+	}
+	json.NewEncoder(w).Encode(map[string][]Inventory{"inventories":inventories})
+}

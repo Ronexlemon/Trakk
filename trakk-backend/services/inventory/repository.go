@@ -3,6 +3,7 @@ package inventory
 import (
 	"context"
 	"fmt"
+	"time"
 	"trakk/db"
 
 	//supa "github.com/nedpals/supabase-go"
@@ -94,6 +95,66 @@ func (r *Repository) GetAll(user_id string, ctx context.Context) ([]Inventory, e
 	var inventories []Inventory
 	if err = cursor.All(ctx, &inventories); err != nil {
 		return nil, err
+	}
+	return inventories, nil
+
+}
+
+
+func (r *Repository) InventoryPerPeriod(user_id bson.ObjectID,period string,ctx context.Context)([]Inventory,error){
+	
+	var matchcondition bson.M
+	var startDate, endDate time.Time
+	now:= time.Now()
+
+	switch period{
+	case "monthly":
+		startDate = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+		endDate = startDate.AddDate(0, 1, -1).Add(23*time.Hour + 59*time.Minute + 59*time.Second)
+	case "weekly":
+		startDate = now.AddDate(0, 0, -int(now.Weekday()))
+		endDate = startDate.AddDate(0, 0, 6).Add(23*time.Hour + 59*time.Minute + 59*time.Second)
+	default:
+		return nil, fmt.Errorf("invalid period type. Use 'monthly' or 'weekly'")
+	}
+	matchcondition = bson.M{
+		"user_id": user_id,
+		"created_at":bson.M{
+			"$gte": startDate,
+			"$lte": endDate,
+		},
+	}
+	pipeline :=[]bson.M{
+		{"$match":matchcondition},
+		{
+			"$project": bson.M{
+				"_id":         1,          // include the _id field
+				"user_id":     1,          // Include user_id
+				"name":        1,          // Include name
+				"description": 1,          // Include description
+				"quantity":    1,          // Include quantity
+				"price":       1,          // Include price
+				"category":    1,          // Include category
+				"created_at":  1,          // Include created_at
+				"updated_at":  1,          // Include updated_at
+			},},
+	}
+	cursor,err :=r.dbClient.Database("Trakk").Collection("inventories").Aggregate(ctx,pipeline)
+	
+	if err !=nil{
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+	var inventories []Inventory
+	for cursor.Next(ctx){
+		var inventory Inventory
+		if err := cursor.Decode(&inventory); err !=nil{
+			return nil,err
+		}
+		inventories = append(inventories, inventory)
+	}
+	if err :=cursor.Err();err !=nil{
+		return nil,err
 	}
 	return inventories, nil
 
