@@ -20,7 +20,7 @@ func InitializeRoutes(r *mux.Router){
   r.Handle("/api/inventory/user/inventories",middleware.JwtAuthMiddleware(http.HandlerFunc(inventoryRoutes.UserInventories))).Methods("GET")
   r.Handle("/api/inventory/{id}",middleware.JwtAuthMiddleware(http.HandlerFunc(inventoryRoutes.UpdateInventory))).Methods("PUT")
   r.Handle("/api/inventory/{id}",middleware.JwtAuthMiddleware(http.HandlerFunc(inventoryRoutes.Deletenventory))).Methods("DELETE")
-  r.Handle("/api/inventory/user/inventories/{period}",middleware.JwtAuthMiddleware(http.HandlerFunc(inventoryRoutes.InventoriesPerPeriod))).Methods("GET")
+  r.Handle("/api/inventory/user/inventories/{period}/{year}/{month}/{day}",middleware.JwtAuthMiddleware(http.HandlerFunc(inventoryRoutes.InventoriesPerPeriod))).Methods("GET")
 
 
   //r.HandleFunc("/api/user/login",authRoutes.LoginUser).Methods("POST")

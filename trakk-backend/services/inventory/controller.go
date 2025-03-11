@@ -5,11 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 	"trakk/middleware"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/gorilla/mux"
+
 	//"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
@@ -174,6 +176,25 @@ inventory_Id := vars["id"]
 
 
 func (i *InventoryRoutes) InventoriesPerPeriod(w http.ResponseWriter, r *http.Request){
+	vars := mux.Vars(r)
+	period := vars["period"]
+	day := vars["day"]
+	month := vars["month"]
+	year := vars["year"]
+	//check if the vars are empty
+	if period == "" && day == "" && month == "" && year == "" {
+		http.Error(w, "Missing period", http.StatusBadRequest)
+		return
+		}
+		 day_,err := strconv.Atoi(day)
+		 month_,err:= strconv.Atoi(month)
+		 year_,err:= strconv.Atoi(year)
+
+	if err != nil {
+		http.Error(w, "Invalid day format", http.StatusBadRequest)
+		return
+		}
+
 	claims,ok := r.Context().Value(userContext).(jwt.MapClaims)
 	if !ok {
 		http.Error(w, "Failed to retrieve user info from context", http.StatusUnauthorized)
@@ -186,8 +207,8 @@ func (i *InventoryRoutes) InventoriesPerPeriod(w http.ResponseWriter, r *http.Re
 			http.Error(w,"Invalid user ID Format", http.StatusBadRequest)
 			return
 		}
-
-	inventories,err:=i.repository.InventoryPerPeriod(id,"monthly",ctx)
+ 
+	inventories,err:=i.repository.InventoryPerPeriod(id,year_,month_,&day_,period,ctx)
 	if err !=nil{
 		http.Error(w,"Unable to fetch inventorires",http.StatusInternalServerError)
 		return

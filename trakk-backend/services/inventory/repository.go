@@ -101,19 +101,31 @@ func (r *Repository) GetAll(user_id string, ctx context.Context) ([]Inventory, e
 }
 
 
-func (r *Repository) InventoryPerPeriod(user_id bson.ObjectID,period string,ctx context.Context)([]Inventory,error){
-	
+func (r *Repository) InventoryPerPeriod(user_id bson.ObjectID,year int, month int, day *int, periodType string, ctx context.Context)([]Inventory,error){
+	if month < 1 || month > 12 {
+		return nil, fmt.Errorf("invalid month value, it should be between 1 and 12")
+	}
 	var matchcondition bson.M
 	var startDate, endDate time.Time
-	now:= time.Now()
+	
 
-	switch period{
-	case "monthly":
-		startDate = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+	switch periodType{
+	case "day":
+		if day == nil || *day < 1 || *day > 31 {
+			return nil, fmt.Errorf("invalid day value")
+		}
+		// Set start and end to the same day
+		startDate = time.Date(year, time.Month(month), *day, 0, 0, 0, 0, time.UTC)
+		endDate = startDate.Add(23*time.Hour + 59*time.Minute + 59*time.Second)
+	case "month":
+		startDate = time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
 		endDate = startDate.AddDate(0, 1, -1).Add(23*time.Hour + 59*time.Minute + 59*time.Second)
-	case "weekly":
-		startDate = now.AddDate(0, 0, -int(now.Weekday()))
-		endDate = startDate.AddDate(0, 0, 6).Add(23*time.Hour + 59*time.Minute + 59*time.Second)
+	case "year":
+		startDate = time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC)
+		endDate = time.Date(year, 12, 31, 23, 59, 59, 0, time.UTC)
+	case "6months":
+		endDate = time.Now()
+		startDate = endDate.AddDate(0, -6, 0)
 	default:
 		return nil, fmt.Errorf("invalid period type. Use 'monthly' or 'weekly'")
 	}
